@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma実装ガイド｜SNSタイプ診断</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f5f5f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 40px 16px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    /* ヘッダー */
+    .header {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+    .header-tag {
+      display: inline-block;
+      background: linear-gradient(90deg, #ffd764, #fff0a0, #e8b850);
+      color: #7a5500;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      color: #111;
+    }
+    .header .subtitle {
+      font-size: 14px;
+      color: #777;
+      line-height: 1.8;
+    }
+
+    /* Figmaリンク */
+    .figma-link-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin-bottom: 56px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .figma-icon {
+      width: 38px;
+      height: 38px;
+      background: #f6f6f6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .figma-link-box .label {
+      font-size: 10px;
+      color: #aaa;
+      margin-bottom: 3px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+    }
+    .figma-link-box a {
+      color: #b37d00;
+      font-size: 13px;
+      word-break: break-all;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .figma-link-box a:hover { text-decoration: underline; }
+
+    /* 最重要ブロック */
+    .hero-tip {
+      background: linear-gradient(135deg, #fffaea, #fff5dc);
+      border: 2px solid #ffd764;
+      border-radius: 16px;
+      padding: 28px 26px;
+      margin-bottom: 56px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(232,184,80,0.15);
+    }
+    .hero-tip .hero-badge {
+      position: absolute;
+      top: -12px;
+      left: 22px;
+      background: #1a1a1a;
+      color: #ffd764;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .hero-tip h2 {
+      font-size: 19px;
+      font-weight: 900;
+      color: #5a3c00;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      margin-top: 6px;
+    }
+    .hero-tip p {
+      font-size: 13.5px;
+      color: #6a5020;
+      line-height: 1.9;
+    }
+    .hero-tip .emphasis {
+      background: #ffe58a;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: 700;
+    }
+
+    /* セクションラベル */
+    .section-label {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: #bbb;
+      margin-bottom: 18px;
+      text-transform: uppercase;
+    }
+    .section-heading {
+      font-size: 18px;
+      font-weight: 900;
+      color: #111;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1a1a1a;
+    }
+
+    /* ステップカード */
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 56px;
+    }
+    .step-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 14px;
+      padding: 22px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .step-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #ffd764, #e8b850);
+      color: #6a4400;
+      font-size: 13px;
+      font-weight: 900;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .step-card h3 {
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.5;
+      color: #111;
+    }
+    .step-card p {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.9;
+    }
+    .step-card .note {
+      display: inline-block;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 11px;
+      color: #888;
+      margin-top: 10px;
+    }
+    .step-card ul {
+      padding-left: 20px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.9;
+    }
+    .step-card ul li { margin-bottom: 4px; }
+
+    /* コピペボックス */
+    .copy-section {
+      margin-bottom: 40px;
+    }
+    .copy-box {
+      background: #fafafa;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .copy-box-header {
+      background: #f1f1f1;
+      border-bottom: 1px solid #e4e4e4;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .copy-box-header .copy-title {
+      font-size: 11px;
+      color: #888;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .copy-btn {
+      background: #fff;
+      border: 1px solid #d8d8d8;
+      border-radius: 6px;
+      color: #666;
+      font-size: 11px;
+      padding: 5px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: #f0f0f0;
+      color: #222;
+    }
+    .copy-btn.copied {
+      background: #edfaf3;
+      border-color: #a3d9b9;
+      color: #1a7a45;
+    }
+    .copy-box pre {
+      padding: 20px 18px;
+      font-size: 12px;
+      line-height: 1.9;
+      color: #333;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+    }
+    .copy-caption {
+      font-size: 12px;
+      color: #888;
+      margin-top: 10px;
+      line-height: 1.7;
+    }
+
+    /* ルールカード */
+    .rules {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 56px;
+    }
+    .rule-item {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-left: 3px solid #e8b850;
+      border-radius: 0 10px 10px 0;
+      padding: 16px 22px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .rule-item .rule-title {
+      font-size: 13.5px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      color: #a67300;
+    }
+    .rule-item p {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+    }
+
+    /* 数値メモ */
+    .spec-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 56px;
+    }
+    @media (max-width: 480px) {
+      .spec-grid { grid-template-columns: 1fr; }
+    }
+    .spec-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .spec-card .spec-title {
+      font-size: 11px;
+      color: #aaa;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .spec-row .key { color: #999; }
+    .spec-row .val { color: #222; font-weight: 700; font-family: monospace; }
+    .color-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    /* Q&A */
+    .qa-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 56px;
+    }
+    .qa-item {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .qa-q {
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #222;
+      display: flex;
+      gap: 10px;
+    }
+    .qa-q::before {
+      content: 'Q';
+      color: #b37d00;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .qa-a {
+      padding: 12px 18px 14px 44px;
+      font-size: 13px;
+      color: #666;
+      line-height: 1.8;
+      border-top: 1px solid #f0f0f0;
+      position: relative;
+    }
+    .qa-a::before {
+      content: 'A';
+      position: absolute;
+      left: 18px;
+      color: #1a9a50;
+      font-weight: 900;
+    }
+
+    /* チェックリスト */
+    .checklist {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 56px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px dashed #efefef;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.6;
+    }
+    .check-item:last-child { border-bottom: none; }
+    .check-item::before {
+      content: '☐';
+      color: #bbb;
+      font-size: 16px;
+      font-weight: 900;
+      flex-shrink: 0;
+      line-height: 1.3;
+    }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      padding-top: 28px;
+      border-top: 1px solid #e8e8e8;
+    }
+    .footer p {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div class="header-tag">VIBE CODING GUIDE</div>
+    <h1>Figma実装ガイド<br>SNSタイプ診断 / 結果ページ</h1>
+    <p class="subtitle">はじめてバイブコーディングをする方向け。<br>上から順番に読めば迷いません！</p>
+  </div>
+
+  <!-- Figmaリンク -->
+  <div class="figma-link-box">
+    <div class="figma-icon">🎨</div>
+    <div>
+      <div class="label">FIGMA URL</div>
+      <a href="https://www.figma.com/design/TKfrkB5wPL1c3PL29lXpVN/SNS%E8%BF%BD%E5%8A%A0%E3%83%9A%E3%83%BC%E3%82%B8?node-id=1-4&m=dev" target="_blank">
+        figma.com / SNS追加ページ（node-id: 1-4）
+      </a>
+    </div>
+  </div>
+
+  <!-- 最重要ブロック -->
+  <div class="hero-tip">
+    <div class="hero-badge">★ 最重要 ★</div>
+    <h2>数値をズラさないコツは、<br>「Claudeに目測させない」こと</h2>
+    <p>
+      自分の目で見て<span class="emphasis">「だいたいこのくらい」</span>と伝えると、必ずズレます。<br>
+      <strong>Figma MCPを使って、ClaudeにFigmaから数値を直接読ませる</strong>のが最強の方法です。<br>
+      このガイドの通りに進めれば、ぎいちゃんのデザインの数値を<br>小数点レベルで忠実に再現できます。
+    </p>
+  </div>
+
+  <!-- STEP -->
+  <div class="section-heading">STEP｜作業手順</div>
+  <div class="step-list">
+
+    <div class="step-card">
+      <div class="step-head">
+        <div class="step-num">1</div>
+        <h3>Claude Code に Figma MCP を接続する</h3>
+      </div>
+      <p>
+        Claude Code を開いて、Figma公式のMCPサーバーを登録します。<br>
+        一度つなげばURLを貼るだけでClaudeがFigmaを直接読めるようになります。
+      </p>
+      <ul style="margin-top:10px;">
+        <li>公式手順：「Claude Code Figma MCP」で検索</li>
+        <li>Figmaファイルへの閲覧権限があればOK</li>
+      </ul>
+      <span class="note">最初の1回だけ必要</span>
+    </div>
+
+    <div class="step-card">
+      <div class="step-head">
+        <div class="step-num">2</div>
+        <h3>下の「最初の指示」をコピーして貼るだけ</h3>
+      </div>
+      <p>
+        次のセクションにClaude Codeへ貼るプロンプトを用意しました。<br>
+        そのまま貼って送信すれば、FigmaからHTML/CSSの実装が始まります。
+      </p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-head">
+        <div class="step-num">3</div>
+        <h3>1セクションずつ確認しながら進める</h3>
+      </div>
+      <p>
+        一気に全部作ろうとすると、崩れたとき修正が大変になります。<br>
+        <strong>上から順に→1セクション実装→ブラウザで確認→OKなら次へ</strong>が一番速くて確実です。
+      </p>
+    </div>
+
+  </div>
+
+  <!-- コピペ：プロンプト -->
+  <div class="section-heading">最初の指示｜コピペしてClaude Codeへ</div>
+  <div class="copy-section">
+    <div class="copy-box">
+      <div class="copy-box-header">
+        <span class="copy-title">PROMPT</span>
+        <button class="copy-btn" onclick="copyText(this, 'prompt')">コピー</button>
+      </div>
+      <pre id="prompt">以下のFigmaデザインをHTMLとCSSで実装してください。
+
+Figma URL：
+https://www.figma.com/design/TKfrkB5wPL1c3PL29lXpVN/SNS追加ページ?node-id=1-4&m=dev
+
+【実装のルール】
+1. Figma MCPを使ってデザインの数値を直接読み取り、
+   px・小数点も含めて忠実に再現してください
+2. 色・グラデーション・シャドウ・letter-spacingは
+   一切省略せずに実装してください
+3. フォントはGoogle Fontsから読み込んでください
+  （M PLUS 1 / Noto Sans JP / Dela Gothic One / Inter）
+4. position:absoluteは使わず、
+   flexboxまたはgridで積み上げて組んでください
+5. まず最初のセクション（ヘッダー〜ロゴ並び）だけ
+   実装して見せてください。
+   私が確認してから次のセクションに進みます</pre>
+    </div>
+    <p class="copy-caption">※ このプロンプトが「数値をズラさない」ための鍵です。省略せず全文貼ってください。</p>
+  </div>
+
+  <!-- コピペ：フォント -->
+  <div class="section-heading">フォント｜&lt;head&gt;に貼る</div>
+  <div class="copy-section">
+    <div class="copy-box">
+      <div class="copy-box-header">
+        <span class="copy-title">GOOGLE FONTS</span>
+        <button class="copy-btn" onclick="copyText(this, 'fonts')">コピー</button>
+      </div>
+      <pre id="fonts">&lt;link href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@400;700;800;900&family=Noto+Sans+JP:wght@900&family=Dela+Gothic+One&family=Inter:wght@800&display=swap" rel="stylesheet"&gt;</pre>
+    </div>
+    <p class="copy-caption">使用フォント：M PLUS 1 / Noto Sans JP / Dela Gothic One / Inter</p>
+  </div>
+
+  <!-- 画像アセット -->
+  <div class="section-heading">画像アセットの取得方法</div>
+  <div class="step-card" style="margin-bottom:56px;">
+    <p>
+      Figmaの中にある画像（イラスト・ロゴ・キラキラ素材など）は、<br>
+      Figma上で <strong>書き出し（Export）</strong> して使います。
+    </p>
+    <ul style="margin-top:12px;">
+      <li>画像要素を選択 → 右パネル下部「Export」</li>
+      <li>形式：PNG or JPG（透過が必要ならPNG）</li>
+      <li>倍率：<strong>2x</strong> を推奨（Retina対応）</li>
+      <li>書き出した画像は <code style="background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:12px;">images/</code> フォルダにまとめて保存</li>
+    </ul>
+    <span class="note" style="margin-top:12px;">Claudeにもアセット書き出しを依頼できます</span>
+  </div>
+
+  <!-- 数値ズレ防止ルール -->
+  <div class="section-heading">数値をズラさないための3つのルール</div>
+  <div class="rules">
+    <div class="rule-item">
+      <div class="rule-title">① 目測せず、必ずFigmaから数値を読ませる</div>
+      <p>「だいたい」「多分」はNG。Claudeに「Figmaの数値を直接読んで」と毎回伝える。</p>
+    </div>
+    <div class="rule-item">
+      <div class="rule-title">② シャドウ・グラデーション・字間は省略させない</div>
+      <p>このデザインは装飾で成り立っています。省略すると一気に安っぽくなるので必ず実装させる。</p>
+    </div>
+    <div class="rule-item">
+      <div class="rule-title">③ 1セクションずつ確認・こまめに修正</div>
+      <p>全部作ってから直すより、1個作って確認するほうが圧倒的に速い。焦らず進める。</p>
+    </div>
+  </div>
+
+  <!-- 主要数値メモ -->
+  <div class="section-heading">参考｜主要な数値メモ</div>
+  <div class="spec-grid">
+
+    <div class="spec-card">
+      <div class="spec-title">画面サイズ</div>
+      <div class="spec-row"><span class="key">ベース幅</span><span class="val">430px</span></div>
+      <div class="spec-row"><span class="key">基準デバイス</span><span class="val">iPhone 16 Pro Max</span></div>
+      <div class="spec-row"><span class="key">背景色</span><span class="val">#ffffff</span></div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-title">緑のCTAボタン</div>
+      <div class="spec-row"><span class="key">サイズ</span><span class="val">385 × 113</span></div>
+      <div class="spec-row"><span class="key">角丸</span><span class="val">18px</span></div>
+      <div class="spec-row"><span class="key">枠線</span><span class="val">5px #009f41</span></div>
+      <div class="spec-row"><span class="key">文字</span><span class="val">24px 白</span></div>
+      <div class="spec-row"><span class="key">字間</span><span class="val">1.44px</span></div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-title">金色バー（グラデ）</div>
+      <div class="spec-row"><span class="key">角丸</span><span class="val">4px</span></div>
+      <div style="font-size:11.5px;color:#555;line-height:2;margin-top:8px;font-family:monospace;">
+        <span class="color-dot" style="background:#ffd764"></span>#ffd764 (start)<br>
+        <span class="color-dot" style="background:#fff8c8"></span>#fff8c8 (mid)<br>
+        <span class="color-dot" style="background:#e8b850"></span>#e8b850 (end)
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <div class="spec-title">CTAボタンの影（2段）</div>
+      <div style="font-size:11.5px;color:#555;line-height:2;font-family:monospace;margin-top:4px;">
+        0px 10px 20px 0px<br>
+        rgba(6,199,85,0.45),<br>
+        0px 11px 0px 0px #016b2c
+      </div>
+      <p style="font-size:11.5px;color:#999;margin-top:8px;line-height:1.6;">下向き影が3D感のカギ</p>
+    </div>
+
+  </div>
+
+  <!-- Q&A -->
+  <div class="section-heading">ハマりやすい落とし穴</div>
+  <div class="qa-list">
+
+    <div class="qa-item">
+      <div class="qa-q">フォントが違って見える</div>
+      <div class="qa-a">Google Fontsのlinkタグが&lt;head&gt;に入っているか確認。font-weightの数値も合わせてください（Black = 900, ExtraBold = 800）。</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">ボタンが平べったい（3Dに見えない）</div>
+      <div class="qa-a">box-shadowが2段になっているか確認。下向きの影「0px 11px 0px 0px #016b2c」が抜けると一気に立体感が消えます。</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">要素の位置が微妙にズレる</div>
+      <div class="qa-a">position:absoluteは使わず、flexboxかgridで組むのが安全。Figmaのy座標をそのまま再現しようとすると崩れやすいです。</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">小数点のpx（420.491px など）が気になる</div>
+      <div class="qa-a">基本はそのまま再現で問題ありません。見た目に影響しない小数は四捨五入してもOKです。</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">画面外や重なった謎の要素が出てくる</div>
+      <div class="qa-a">ぎいちゃんのFigmaには装飾・背景用の画像が重ねて配置されています。見えない要素はいったん無視して、見える範囲のメインから作ってOKです。</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">文字のドロップシャドウが多くて混乱する</div>
+      <div class="qa-a">text-shadowを2段以上重ねているものがあります。Claudeに「text-shadowも全部再現して」と伝えれば忠実に出してくれます。</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">崩れて修正が大変になった</div>
+      <div class="qa-a">一気に全部作ろうとしたのが原因のことがほとんど。Ctrl+Zで戻して、1セクションずつに戻しましょう。</div>
+    </div>
+
+  </div>
+
+  <!-- チェックリスト -->
+  <div class="section-heading">完成前の最終チェックリスト</div>
+  <div class="checklist">
+    <div class="check-item">FigmaとブラウザをスマホサイズW430で並べて見比べ、ズレがないか</div>
+    <div class="check-item">フォント（特にM PLUS 1 Black）が正しく読み込まれている</div>
+    <div class="check-item">緑のCTAボタンの2段シャドウが効いて立体的に見える</div>
+    <div class="check-item">金色グラデーションバーの色が3段（ゴールド→クリーム→ゴールド）になっている</div>
+    <div class="check-item">タイトル文字のtext-shadowが省略されていない</div>
+    <div class="check-item">キラキラや装飾画像が抜け落ちていない</div>
+    <div class="check-item">画像アセットはimages/フォルダに整理されている</div>
+    <div class="check-item">スマホ実機（iPhone）で確認した</div>
+  </div>
+
+  <!-- フッター -->
+  <div class="footer">
+    <p>
+      わからなくなったらいつでも聞いてください◎<br>
+      このガイドも自由に追記・共有OKです
+    </p>
+  </div>
+
+</div>
+
+<script>
+  function copyText(btn, id) {
+    const el = document.getElementById(id);
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      btn.textContent = 'コピーしました!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'コピー';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
